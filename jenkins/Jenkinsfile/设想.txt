@@ -1,0 +1,25 @@
+1, pipeline grovy配置流水线
+
+ 范围：jenkins部署项目动作，数据收集。
+ 
+ 
+2，Blue Ocean 强大功能,编排控制 pipeline,收集流水线数据;
+
+3, 工程代码质量：主流find-bugs, checkstyle, PMD 数据提取
+
+4, Allure 报告插件\Report Info 报告插件流水线执行显示代码缺陷数据
+
+5, jenkins pipeline 实例回放。
+
+第三方插件:
+
+http://hygieia.github.io/Hygieia/screenshots.html
+
+
+
+
+
+
+
+
+

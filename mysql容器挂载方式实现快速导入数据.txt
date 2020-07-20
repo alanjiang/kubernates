@@ -1,0 +1,21 @@
+1, 先在mysql数据库导出数据
+
+DATE="mysql-`date +'%Y%m%d-%H%M%S'`"
+LogFile="$BACK_DIR"/mysql_dump.log #日志记录保存的目录
+BackNewFile=$DATE.sql
+
+$BIN_DIR/mysqldump --opt --force -u$DB_USER  -p$DB_PASS $DB_NAME --skip-lock-tables > $BACK_DIR/$DATE.sql
+
+2,  
+
+json=[{"workLoadType":"fcb50b3fbb384dd399e52cf4769a91ce","personId":"jiangpeng@agilean.cn","date":$time,"workLoad":$lines,"cardId":$cardId,"orgId":"771ac1a5-fca5-4af2-b744-27b16e989b18"}]
+
+echo $json
+
+curl -X POST -d '${json}'  -s -v -H "Content-Type: application/json;charset=UTF-8" -H  "token:1908ddd" -- "http://IP:PORT/org/ID"
+
+
+scp -r root@118.190.169.181:/nfsc/kb/backup/mysql-20200608-020039.sql /Users/zhangxiao/tem
+
+
+scp -r /Users/zhangxiao/tem/mysql-20200502-124506.sql root@39.102.48.153:/mnt/zw-docker/

@@ -1,0 +1,123 @@
+version: "3.0"
+services:
+ 
+ my-mysql:
+    container_name: my-mysql
+    restart: unless-stopped
+    build:
+      context: ./mysql/
+      dockerfile: Dockerfile
+    #image: "mysql:5.7"
+    image: "${PREFIX}/my-mysql:0.1"
+    hostname: my-mysql
+    networks:
+      default:
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=mysql
+      - MYSQL_USER=dian
+      - MYSQL_PASSWORD=dian123
+      - MYSQL_DATABASE=dian
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == docker1]	
+    #volumes:
+    #  - "/mnt/zw-docker/files/mysql:/var/lib/mysql"
+    #   here, put your scripts
+    #   - "/mnt/zw-docker/files/mysql-scripts/:/docker-entrypoint-initdb.d/"
+    #  - "/mnt/zw-docker/files/mysql-conf/mysql:/etc/mysql"
+ 
+ 
+ #redis,6379
+ my-redis:
+    container_name: "my-redis"
+    build:
+      context: ./redis/
+      dockerfile: Dockerfile
+    image: "${PREFIX}/my-redis:0.1"
+    command: redis-server /data/redis.conf
+    networks:
+     default:
+    ports:
+      - "6379:6379"
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == docker1]
+    #volumes:
+    #     - "/mnt/zw-docker/files/redis/redis.conf:/data/redis.conf"
+    #    #- "/mnt/zw-docker/files/redis/data:/data/db"
+    restart: always
+
+  
+ my-zookeeper:
+    build:
+      context: ./zookeeper/
+      dockerfile: Dockerfile
+    image: '${PREFIX}/my-zookeeper:0.1'
+    #image: 'bitnami/zookeeper:3'
+    container_name: 'my-zookeeper'
+    ports:
+      - '2181:2181'
+    #expose:
+    # - '2181'
+    networks:
+     default:
+    #volumes:
+    #  - '/data/my/zookeeper:/bitnami/zookeeper'
+    environment:
+      - 'ALLOW_ANONYMOUS_LOGIN=yes'
+      - ZOO_ENABLE_AUTH=false
+      - 'zookeeper.volumePermissions.enabled=true'
+      #- ZOO_ENABLE_AUTH=yes
+      #- ZOO_SERVER_USERS=kafka
+      #- ZOO_SERVER_PASSWORDS=kafka_password
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == docker1]
+    restart: always
+
+ my-kafka:
+    #image: 'bitnami/kafka:2'
+    build:
+      context: ./kafka/
+      dockerfile: Dockerfile
+    image: '${PREFIX}/my-kafka:0.1'
+    container_name: "my-kafka"
+    ports:
+      - '9092:9092'
+      - '2092:2092'     
+    #expose:
+    #  - '9092'
+    #  - '2092'
+    networks:
+      default:
+    #volumes:
+    #  - '/data/my/kafka/data:/bitnami/kafka'
+    environment:
+      #- ZOO_ENABLE_AUTH=yes
+      - KAFKA_DELETE_TOPIC_ENABLE=true
+      - 'ALLOW_ANONYMOUS_LOGIN=yes'
+      - ZOO_ENABLE_AUTH=false
+      - 'zookeeper.volumePermissions.enabled=true'
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=my-zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_ADVERTISED_HOST_NAME=my-kafka
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:2092,PLAINTEXT_HOST://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://my-kafka:2092,PLAINTEXT_HOST://my-kafka:9092
+      #- KAFKA_ZOOKEEPER_USER=kafka
+      #- KAFKA_ZOOKEEPER_PASSWORD=kafka_password
+    deploy:
+      placement:
+        constraints: [node.HOSTNAME == docker1]
+    depends_on:
+      - my-zookeeper
+  
+
+  
+  
+networks:
+   default:
+     external:
+       name: mynet

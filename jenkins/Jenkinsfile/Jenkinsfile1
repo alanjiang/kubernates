@@ -1,0 +1,47 @@
+# credentialsId: 即为我们创建的包含用户名和密码的用户信息的id(这个id是jenkins自动生成的)这里通过这个id,Jenkins便可以找到这个用户名和密码.
+step1: master上生成公匙
+
+ssh-keygen -t rsa 
+
+step2: 设置API Token
+jenkinsToken: 
+1157b2dc39f1a9cfd680b7faa6bdd6d1da
+
+http://39.102.50.86:9999/job/pipeline/build?token=jenkinsToken
+
+pipeline{
+    agent any
+    tools{
+        maven 'maven-3' 
+    }
+    stages{
+        stage('checkout code'){
+            steps{                  
+                git credentialsId: '44995c0f-aca7-4907-9610-35defe8bd7e6', url: 'https://github.com/alanjiang/socialgit.git'
+            }
+        }
+        stage('mvn test'){
+            steps{
+                sh "mvn -B -f ${env.workspace}/pom.xml pmd:pmd"
+            }
+        }
+    }
+    post{
+        always{   //always表示不管怎么样都做下面的操作
+            
+            echo '单元测试通过'
+        }
+        failure{ 
+            step([
+                $class: 'Mailer',
+                notifyEveryUnstableBuild: true,
+                recipients: "jiangpenghnlg@126.com",
+                sendToIndividuals: true
+            ])
+            echo "失败了，请检查 pipeline code！"
+        }
+        success{
+            echo "成功"
+            }
+    }
+}
